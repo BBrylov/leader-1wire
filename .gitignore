@@ -1,52 +1,23 @@
-# Prerequisites
-*.d
+#cppchack
+*.dump
+#astyle
+*.orig
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+#CubeMX
+*.ld
+.mxproject
+Makefile
+.fuse_*
 
-# Linker output
-*.ilk
-*.map
-*.exp
+#Clion
+.idea
+cmake-build-*
+core
 
-# Precompiled Headers
-*.gch
-*.pch
+#CMmake
+build/*
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+#VSCode
+.vscode/*
+!cmake-kits.json
+!cmake-variants.json
