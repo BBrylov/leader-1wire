@@ -24,7 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "mainUser.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -81,7 +81,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+    logger.info("Start swo");
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -98,7 +98,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+    loop();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
