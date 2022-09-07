@@ -29,6 +29,11 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
+typedef enum
+{
+  ITStatusRESET = 0,
+  ITStatusSET = !ITStatusRESET
+}  UartStatus;
 
 /* USER CODE END Includes */
 

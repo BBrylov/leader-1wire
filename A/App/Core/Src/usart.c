@@ -21,7 +21,7 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-
+__IO UartStatus UartReady = ITStatusRESET;
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;

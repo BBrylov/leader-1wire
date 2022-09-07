@@ -7,7 +7,7 @@
 
 #include "onewire.h"
 #include "stm32f1xx_hal.h"
-
+#include "stm32f1xx_ll_usart.h"
 //*************************************************
 #ifdef OW_UART1
 
@@ -75,19 +75,50 @@
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 /* Exported functions ------------------------------------------------------- */
 
-static OverDrive=0;
-void setOverDrive(int8_t newOverDrive){
+static UART_HandleTypeDef UartHandle = {0};
+static DMA_HandleTypeDef hdma_usart1_rx = {0};
+static DMA_HandleTypeDef hdma_usart1_tx = {0};
+
+static OverDrive overDrive=0;
+
+void setOverDrive(OverDrive newOverDrive){
     if (newOverDrive!=0)
-        OverDrive=1;
-    else OverDrive=0;
+        overDrive=1;
+    else overDrive=0;
 }
 
-int8_t getOverDrive (){
-    return OverDrive;
+
+OverDrive getOverDrive (){
+    return overDrive;
 }
+
+static uint32_t getOverDriveSpeed (OverDrive overDrive){
+        uint32_t result=115200;
+            switch (overDrive)
+            {
+                case OVERDRIVESPEED: result=921600;
+                    break;
+                default:
+                    break;
+            }
+    return result;
+}
+
+static uint32_t getOverDriveResetSpeed (OverDrive overDrive){
+        uint32_t result=9600;
+            switch (overDrive)
+            {
+                case OVERDRIVESPEED: result=76800;
+                    break;
+                default:
+                    break;
+            }
+    return result;
+}
+
 
 // Буфер для приема/передачи по 1-wire
-uint8_t ow_buf[8];
+static  uint8_t ow_buf[8];
 
 #define OW_0	0x00
 #define OW_1	0xff
@@ -98,7 +129,7 @@ uint8_t ow_buf[8];
 // ow_byte - байт, который надо преобразовать
 // ow_bits - ссылка на буфер, размером не менее 8 байт
 //-----------------------------------------------------------------------------
-void OW_toBits(uint8_t ow_byte, uint8_t *ow_bits) {
+static void OW_toBits(uint8_t ow_byte, uint8_t *ow_bits) {
 	uint8_t i;
 	for (i = 0; i < 8; i++) {
 		if (ow_byte & 0x01) {
@@ -115,7 +146,7 @@ void OW_toBits(uint8_t ow_byte, uint8_t *ow_bits) {
 // обратное преобразование - из того, что получено через USART опять собирается байт
 // ow_bits - ссылка на буфер, размером не менее 8 байт
 //-----------------------------------------------------------------------------
-uint8_t OW_toByte(uint8_t *ow_bits) {
+static uint8_t OW_toByte(uint8_t *ow_bits) {
 	uint8_t ow_byte, i;
 	ow_byte = 0;
 	for (i = 0; i < 8; i++) {
@@ -196,44 +227,47 @@ uint8_t OW_Init() {
 //-----------------------------------------------------------------------------
 // осуществляет сброс и проверку на наличие устройств на шине
 //-----------------------------------------------------------------------------
-uint8_t OW_Reset(int8_t OverDrive) {
+uint8_t OW_Reset(OverDrive overDrive) {
 	uint8_t ow_presence;
-	USART_HandleTypeDef UartHandle;
 
     UartHandle.Instance        = USARTx;
-    UartHandle.Init.BaudRate   = 9600;
+    UartHandle.Init.BaudRate   = getOverDriveResetSpeed(getOverDrive());
     UartHandle.Init.WordLength = UART_WORDLENGTH_8B;
     UartHandle.Init.StopBits   = UART_STOPBITS_1;
     UartHandle.Init.Parity     = UART_PARITY_NONE;
     UartHandle.Init.Mode       = UART_MODE_TX_RX;
+
     if(HAL_UART_DeInit(&UartHandle) != HAL_OK)
     {
-        Error_Handler();
+        //Error_Handler();
     }
+
     if(HAL_UART_Init(&UartHandle) != HAL_OK)
     {
-        Error_Handler();
+        //Error_Handler();
     }
-    while (HAL_USART_GetState(&UartHandle)==HAL_USART_STATE_READY);
+
+    while (HAL_UART_GetState(&UartHandle)==HAL_UART_STATE_READY);
 
     HAL_UART_Transmit(&UartHandle, (uint8_t *)"\xf0", 1, UART_SEND_TIMEOUT);
-    while (LL_USART_IsActiveFlag_TC(OW_UART)==RESET);
+
+    //while ( LL_UART_IsActiveFlag_TC(USARTx) == RESET );
 
     HAL_UART_Receive(&UartHandle, &ow_presence, 1, UART_RECEIVE_TIMEOUT);
 
     UartHandle.Instance        = USARTx;
-    UartHandle.Init.BaudRate   = 115200;
+    UartHandle.Init.BaudRate   = getOverDriveSpeed(getOverDrive());
     UartHandle.Init.WordLength = UART_WORDLENGTH_8B;
     UartHandle.Init.StopBits   = UART_STOPBITS_1;
     UartHandle.Init.Parity     = UART_PARITY_NONE;
     UartHandle.Init.Mode       = UART_MODE_TX_RX;
     if(HAL_UART_DeInit(&UartHandle) != HAL_OK)
     {
-        Error_Handler();
+        //Error_Handler();
     }
     if(HAL_UART_Init(&UartHandle) != HAL_OK)
     {
-        Error_Handler();
+        //Error_Handler();
     }
 
 	if (ow_presence != 0xf0) {
@@ -257,6 +291,7 @@ uint8_t OW_Reset(int8_t OverDrive) {
 //-----------------------------------------------------------------------------
 uint8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen,
 		uint8_t *data, uint8_t dLen, uint8_t readStart) {
+
 
 	// если требуется сброс - сбрасываем и проверяем на наличие устройств
 	if (sendReset == OW_SEND_RESET) {
@@ -288,20 +323,6 @@ uint8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen,
 		// DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
 		// DMA_Init(OW_DMA_CH_RX, &DMA_InitStructure);
 
-        DMA_InitStructure.Instance = OW_DMA_CH_RX;
-        DMA_InitStructure.Init.Direction = DMA_PERIPH_TO_MEMORY;
-        DMA_InitStructure.Init.PeriphInc = DMA_PINC_DISABLE;
-        DMA_InitStructure.Init.MemInc = DMA_MINC_ENABLE;
-        DMA_InitStructure.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-        DMA_InitStructure.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-        DMA_InitStructure.Init.Mode = DMA_NORMAL;
-        DMA_InitStructure.Init.Priority = DMA_PRIORITY_LOW;
-        if (HAL_DMA_Init(&DMA_InitStructure) != HAL_OK)
-        {
-          //Error_Handler();
-        }
-
-
 		// DMA на запись
 		// DMA_DeInit(OW_DMA_CH_TX);
 		// DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &(USART2->DR);
@@ -316,6 +337,39 @@ uint8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen,
 		// DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
 		// DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
 		// DMA_Init(OW_DMA_CH_TX, &DMA_InitStructure);
+
+    /* USART1 DMA Init */
+    /* USART1_RX Init */
+    hdma_usart1_rx.Instance = DMA1_Channel5;
+    hdma_usart1_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_usart1_rx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_usart1_rx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_usart1_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_usart1_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_usart1_rx.Init.Mode = DMA_NORMAL;
+    hdma_usart1_rx.Init.Priority = DMA_PRIORITY_LOW;
+    if (HAL_DMA_Init(&hdma_usart1_rx) != HAL_OK)
+    {
+      //Error_Handler();
+    }
+
+    __HAL_LINKDMA(&UartHandle,hdmarx,hdma_usart1_rx);
+
+    /* USART1_TX Init */
+    hdma_usart1_tx.Instance = DMA1_Channel4;
+    hdma_usart1_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    hdma_usart1_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_usart1_tx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_usart1_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_usart1_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_usart1_tx.Init.Mode = DMA_NORMAL;
+    hdma_usart1_tx.Init.Priority = DMA_PRIORITY_LOW;
+    if (HAL_DMA_Init(&hdma_usart1_tx) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(&UartHandle,hdmatx,hdma_usart1_tx);
 
 		// старт цикла отправки
 		// USART_ClearFlag(OW_UART, USART_FLAG_RXNE | USART_FLAG_TC | USART_FLAG_TXE);

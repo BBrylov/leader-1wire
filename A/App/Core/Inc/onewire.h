@@ -12,6 +12,16 @@
 // на предмет расположения ножек USART
 #include "stm32f1xx.h"
 
+typedef enum
+{
+  NORMALSPEED = 0,
+  OVERDRIVESPEED = 1,
+  MAXSPEED
+} OverDrive;
+
+
+
+
 // выбираем, на каком USART находится 1-wire
 #define OW_UART1
 //#define OW_UART2
@@ -38,8 +48,8 @@
 
 uint8_t OW_Init();
 uint8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen, uint8_t *data, uint8_t dLen, uint8_t readStart);
-uint8_t OW_Reset(int8_t OverDrive);
-int8_t getOverDrive ();
-void setOverDrive(int8_t newOverDrive);
+uint8_t OW_Reset(OverDrive overDrive);
+OverDrive getOverDrive ();
+void setOverDrive(OverDrive newOverDrive);
 
 #endif /* ONEWIRE_H_ */
