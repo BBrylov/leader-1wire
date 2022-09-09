@@ -26,7 +26,6 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
 
 /* USER CODE BEGIN Includes */
 typedef enum
@@ -37,17 +36,14 @@ typedef enum
 
 /* USER CODE END Includes */
 
-extern UART_HandleTypeDef huart1;
-
-extern UART_HandleTypeDef huart2;
-
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
-void MX_USART1_UART_Init(void);
-void MX_USART2_UART_Init(void);
 
+void owInit();
+uint8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen, uint8_t *data, uint8_t dLen, uint8_t readStart);
+uint8_t OW_Reset(OverDrive overDrive);
 /* USER CODE BEGIN Prototypes */
 
 /* USER CODE END Prototypes */
@@ -57,4 +53,3 @@ void MX_USART2_UART_Init(void);
 #endif
 
 #endif /* __USART_H__ */
-
