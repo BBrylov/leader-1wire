@@ -21,6 +21,8 @@
             },
         ],
         "cortex-debug.enableTelemetry": false,
+        "cortex-debug.armToolchainPath": "/opt/gcc-arm-none-eabi/bin",
+        "cortex-debug.openocdPath": "/usr/bin/openocd",
 
         "cmake.revealLog": "always",
         "cmake.statusbar.visibility": "compact",
@@ -54,7 +56,13 @@
         ],
         "files.associations": {
             "stm32f1xx_hal.h": "c",
-            "dma.h": "c"
+            "dma.h": "c",
+            "usart.h": "c",
+            "_stdint.h": "c"
+        },
+        "files.autoSave": "afterDelay",
+        "editor.codeActionsOnSave": {
+        
         },
     }
 }

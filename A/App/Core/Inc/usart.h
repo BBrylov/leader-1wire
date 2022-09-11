@@ -21,6 +21,7 @@
 #ifndef __USART_H__
 #define __USART_H__
 
+#include "stdint.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -42,8 +43,8 @@ typedef enum
 
 
 void owInit();
-uint8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen, uint8_t *data, uint8_t dLen, uint8_t readStart);
-uint8_t OW_Reset(OverDrive overDrive);
+int8_t llReset(uint32_t speed, uint8_t *buffer, uint8_t size );
+
 /* USER CODE BEGIN Prototypes */
 
 /* USER CODE END Prototypes */
