@@ -21,7 +21,8 @@
 #ifndef __USART_H__
 #define __USART_H__
 
-#include "stdint.h"
+#include <stdbool.h>
+#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -40,10 +41,25 @@ typedef enum
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
+typedef enum{
+    UARTSEND,
+    UARTRESEIVE,
+    UARTRESET,
+    UARTNONE,
+} Tcommand;
 
+typedef struct {
+    uint8_t OwerDrive;
+    uint8_t *txBuffer;
+    uint8_t txSize;
+    uint8_t *rxBuffer;
+    uint8_t rxSize;
+    Tcommand command;
+} TowData;
 
-void owInit();
-int8_t llReset(uint32_t speed, uint8_t *buffer, uint8_t size );
+void uartInit();
+int8_t uartSendReset  (TowData *owData);
+int8_t uartSendReceive(TowData *owData);
 
 /* USER CODE BEGIN Prototypes */
 

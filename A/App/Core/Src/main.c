@@ -21,6 +21,7 @@
 #include "dma.h"
 #include "usart.h"
 #include "gpio.h"
+#include "onewire.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -87,15 +88,20 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  owInit();
+  OW_Init();
   /* USER CODE BEGIN 2 */
-
+  OW_Send(OW_SEND_RESET, "\xcc\x44", 2, NULL, NULL, OW_NO_READ);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+        HAL_Delay(1000);
+
+        uint8_t buf[2];
+        OW_Send(OW_SEND_RESET, "\xcc\xbe\xff\xff", 4, buf,2, 2);
+
     /* USER CODE END WHILE */
     loop();
     /* USER CODE BEGIN 3 */

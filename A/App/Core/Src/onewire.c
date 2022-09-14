@@ -9,7 +9,17 @@
 #include "usart.h"
 
 // Буфер для приема/передачи по 1-wire
-uint8_t ow_buf[8];
+uint8_t owRxBuffer[8];
+uint8_t owTxBuffer[8];
+static TowData owData ={
+    .command=UARTNONE,
+    .OwerDrive=0,
+    .rxBuffer=owRxBuffer,
+    .rxSize=sizeof(owRxBuffer),
+    .txBuffer=owTxBuffer,
+    .txSize=sizeof(owTxBuffer),
+};
+
 
 #define OW_0	0x00
 #define OW_1	0xff
@@ -55,90 +65,27 @@ uint8_t OW_toByte(uint8_t *ow_bits) {
 // инициализирует USART и DMA
 //-----------------------------------------------------------------------------
 int8_t OW_Init() {
-	owInit();
-// 	GPIO_InitTypeDef GPIO_InitStruct;
-// 	USART_InitTypeDef USART_InitStructure;
-
-// 	if (OW_USART == USART1) {
-// 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO,
-// 				ENABLE);
-    
-// 		// USART TX
-// 		GPIO_InitStruct.GPIO_Pin = GPIO_Pin_9;
-// 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
-// 		GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-
-// 		GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-// 		// USART RX
-// 		GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10;
-// 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-// 		GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-
-// 		GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-// 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-
-// 		RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-// 	}
-
-// 	if (OW_USART == USART2) {
-// 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO,
-// 				ENABLE);
-
-// 		GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2;
-// 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
-// 		GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-
-// 		GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-// 		GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
-// 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-// 		GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-
-// 		GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-// 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-
-// 		RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-// 	}
-
-// 	USART_InitStructure.USART_BaudRate = 115200;
-// 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-// 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-// 	USART_InitStructure.USART_Parity = USART_Parity_No;
-// 	USART_InitStructure.USART_HardwareFlowControl =
-// 			USART_HardwareFlowControl_None;
-// 	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-
-// 	USART_Init(OW_USART, &USART_InitStructure);
-// 	USART_Cmd(OW_USART, ENABLE);
- 	return OW_OK;
+	uartInit();
+ 	return HAL_OK;
  }
 
 //-----------------------------------------------------------------------------
 // осуществляет сброс и проверку на наличие устройств на шине
 //-----------------------------------------------------------------------------
 int8_t OW_Reset() {
-	uint8_t ow_presence;
+	uint8_t ow_presence = 0xf0;
+    uint8_t ow_return=0xf0;
 
-// 	USART_InitTypeDef USART_InitStructure;
+    owData.command=UARTRESET;
+    owData.OwerDrive=0;
+    owData.txBuffer=&ow_presence;
+    owData.txSize=sizeof(ow_presence);
+    owData.rxBuffer=&ow_return;
+    owData.rxSize=sizeof(ow_return);
 
-// 	USART_InitStructure.USART_BaudRate = 9600;
-// 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-// 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-// 	USART_InitStructure.USART_Parity = USART_Parity_No;
-// 	USART_InitStructure.USART_HardwareFlowControl =
-// 			USART_HardwareFlowControl_None;
-// 	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-// 	USART_Init(OW_USART, &USART_InitStructure);
+    uartSendReset(&owData);
 
-// 	// отправляем 0xf0 на скорости 9600
-// 	USART_ClearFlag(OW_USART, USART_FLAG_TC);
-    ow_presence=0xf0;
-    llReset(9600, &ow_presence, sizeof(ow_presence));
-
-	if (ow_presence != 0xf0) {
+	if (ow_presence != ow_return) {
 		return OW_OK;
 	}
 
@@ -167,14 +114,23 @@ int8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen,
 		}
 	}
 
+    owData.command=UARTSEND;
+    owData.OwerDrive=0;
+    owData.rxBuffer=owRxBuffer;
+    owData.rxSize=sizeof(owRxBuffer);
+    owData.txBuffer=owTxBuffer;
+    owData.txSize=sizeof(owTxBuffer);
+
 	while (cLen > 0) {
 
-		OW_toBits(*command, ow_buf);
+		OW_toBits(*command, owTxBuffer);
 		command++;
 		cLen--;
 
-        llSendReceive(115200, &ow_buf, sizeof(ow_buf));
-        
+
+
+        uartSendReceive(&owData);
+
 // 		DMA_InitTypeDef DMA_InitStructure;
 
 // 		// DMA на чтение
@@ -227,7 +183,7 @@ int8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen,
 
 		// если прочитанные данные кому-то нужны - выкинем их в буфер
 		if (readStart == 0 && dLen > 0) {
-			*data = OW_toByte(ow_buf);
+			*data = OW_toByte(owTxBuffer);
 			data++;
 			dLen--;
 		} else {
@@ -265,13 +221,13 @@ int8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen,
 
             for (numBit = 1; numBit <= 64; numBit++) {
                 // читаем два бита. Основной и комплементарный
-                OW_toBits(0xff, ow_buf);
+                OW_toBits(0xff, owTxBuffer);
 
                 if (SendData(2) < 0)
                     return OW_ERROR_WIRE;
 
-                if (ow_buf[0] == 0xff) {   // читаем два бита. Основной и комплементарный
-                    if (ow_buf[1] == 0xff) {
+                if (owRxBuffer[0] == 0xff) {   // читаем два бита. Основной и комплементарный
+                    if (owRxBuffer[1] == 0xff) {
                         // две единицы, где-то провтыкали и заканчиваем поиск
                         return found;
                     } else {
@@ -279,7 +235,7 @@ int8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen,
                         currentSelection = 1;
                     }
                 } else {
-                    if (ow_buf[1] == 0xff) {
+                    if (owRxBuffer[1] == 0xff) {
                         // 01 - на данном этапе только 0
                         currentSelection = 0;
                     } else {
@@ -318,12 +274,12 @@ int8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen,
                     curDevice[(numBit - 1) >> 3] |= 1 << ((numBit - 1) & 0x07);
                     // (numBit-1)>>3 - номер байта
                     // (numBit-1)&0x07 - номер бита в байте
-                    OW_toBits(0x01, ow_buf);
+                    OW_toBits(0x01, owTxBuffer);
                 } else {
                     curDevice[(numBit - 1) >> 3] &= ~(1 << ((numBit - 1) & 0x07));
                     // (numBit-1)>>3 - номер байта
                     // (numBit-1)&0x07 - номер бита в байте
-                    OW_toBits(0x00, ow_buf);
+                    OW_toBits(0x00, owTxBuffer);
                 }
                 if (SendData(1) < 0)
                     return OW_ERROR_WIRE;

@@ -41,42 +41,40 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle);
 int8_t MX_USART1_UART_Init(uint32_t speed);
 __IO UartStatus UartReady = ITStatusRESET;
 
-void owInit(){
+void uartInit(){
 
     huart1.Instance=USART1;
     HAL_UART_MspInit(&huart1);
 
 }
 
-int8_t llReset(uint32_t speed, uint8_t *buffer, uint8_t size ){
+int8_t uartSendReset(TowData *owData){
 //TODO: сделать проверку параметров
   int8_t result=HAL_ERROR;
   do{
-    if (speed==9600 || speed == 76800)
+
+    MX_USART1_UART_Init(9600);
+    if (HAL_UART_Transmit(&huart1, owData->txBuffer, owData->txSize ,TXTIMEOUT)!=HAL_OK)
       break;
 
-    MX_USART1_UART_Init(speed);
-    if (HAL_UART_Transmit(&huart1,buffer,size,TXTIMEOUT)!=HAL_OK)
+    if (HAL_UART_Receive(&huart1, owData->rxBuffer, owData->rxSize, RXTIMEOUT)!=HAL_OK)
       break;
-
-    if (HAL_UART_Receive(&huart1,buffer,size,RXTIMEOUT)!=HAL_OK)
-      break;
-    result=HAL_OK;  
+    result=HAL_OK;
 
   }while(0);
   return result;
 }
 
-int8_t llSendReceive(uint32_t speed, uint8_t *buffer, uint8_t size ){
+int8_t uartSendReceive( TowData *owData ){
   int8_t result=HAL_ERROR;
   //TODO: Контроль возвращаемых значений и входных параметров
   do{
-      if (speed==921600 || speed == 115200)
-      break;
-      MX_USART1_UART_Init(speed);
+    //   if (speed==921600 || speed == 115200)
+    //   break;
+      MX_USART1_UART_Init(115200);
       HAL_UART_MspInit(USART1);
-      HAL_UART_Receive_DMA (&huart1,buffer,size);
-      HAL_UART_Transmit_DMA(&huart1,buffer,size);
+      HAL_UART_Receive_DMA (&huart1, owData->rxBuffer, owData->rxSize);
+      HAL_UART_Transmit_DMA(&huart1, owData->txBuffer, owData->txSize);
       /*##-4- Wait for the end of the transfer ###################################*/
       while (UartReady != SET);
       result=HAL_OK;
@@ -344,7 +342,3 @@ void DMA1_Channel7_IRQHandler(void)
 
   /* USER CODE END DMA1_Channel7_IRQn 1 */
 }
-
-
-
-
