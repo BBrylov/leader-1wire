@@ -312,7 +312,7 @@ void DMA1_Channel5_IRQHandler(void)
   /* USER CODE END DMA1_Channel5_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart1_rx);
   /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
-    UartReady = SET;
+    //UartReady = SET;
   /* USER CODE END DMA1_Channel5_IRQn 1 */
 }
 
@@ -325,7 +325,7 @@ void DMA1_Channel6_IRQHandler(void)
 
   /* USER CODE END DMA1_Channel6_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart2_rx);
-  UartReady = SET;
+  //UartReady = SET;
   /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
 
   /* USER CODE END DMA1_Channel6_IRQn 1 */
