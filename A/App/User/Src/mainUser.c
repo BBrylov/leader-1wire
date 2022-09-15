@@ -28,7 +28,7 @@ void setup()
 
 void loop()
 {
-	logger.info("test swo");
+	logger.info("test swo\n");
 	HAL_Delay(1000);
 
 }

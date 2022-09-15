@@ -39,7 +39,7 @@ void DMA1_Channel7_IRQHandler(void);
 
 void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle);
 int8_t MX_USART1_UART_Init(uint32_t speed);
-__IO UartStatus UartReady = ITStatusRESET;
+static __IO UartStatus UartReady = ITStatusRESET;
 
 void uartInit(){
 
@@ -77,6 +77,7 @@ int8_t uartSendReceive( TowData *owData ){
       HAL_UART_Transmit_DMA(&huart1, owData->txBuffer, owData->txSize);
       /*##-4- Wait for the end of the transfer ###################################*/
       while (UartReady != SET);
+      UartReady = RESET;
       result=HAL_OK;
   }while(0);
   return result;
@@ -311,7 +312,7 @@ void DMA1_Channel5_IRQHandler(void)
   /* USER CODE END DMA1_Channel5_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart1_rx);
   /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
-
+    UartReady = SET;
   /* USER CODE END DMA1_Channel5_IRQn 1 */
 }
 
@@ -324,6 +325,7 @@ void DMA1_Channel6_IRQHandler(void)
 
   /* USER CODE END DMA1_Channel6_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart2_rx);
+  UartReady = SET;
   /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
 
   /* USER CODE END DMA1_Channel6_IRQn 1 */
@@ -341,4 +343,35 @@ void DMA1_Channel7_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel7_IRQn 1 */
 
   /* USER CODE END DMA1_Channel7_IRQn 1 */
+}
+
+
+/**
+  * @brief  Tx Transfer completed callback
+  * @param  UartHandle: UART handle.
+  * @note   This example shows a simple way to report end of DMA Tx transfer, and
+  *         you can add your own implementation.
+  * @retval None
+  */
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
+  /* Set transmission flag: trasfer complete*/
+  UartReady = SET;
+
+
+}
+
+/**
+  * @brief  Rx Transfer completed callback
+  * @param  UartHandle: UART handle
+  * @note   This example shows a simple way to report end of DMA Rx transfer, and
+  *         you can add your own implementation.
+  * @retval None
+  */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
+  /* Set transmission flag: trasfer complete*/
+  UartReady = SET;
+
+
 }

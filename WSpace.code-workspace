@@ -62,7 +62,8 @@
         },
         "files.autoSave": "afterDelay",
         "editor.codeActionsOnSave": {
-        
+
         },
+        "cortex-debug.variableUseNaturalFormat": false,
     }
 }
