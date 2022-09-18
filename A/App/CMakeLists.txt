@@ -39,6 +39,8 @@ include_directories(
 		# User
 		User/Inc
 		../General/Inc
+		USB_DEVICE/App
+		USB_DEVICE/Target
 )
 
 ########## Build

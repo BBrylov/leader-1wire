@@ -38,5 +38,6 @@
 
 int8_t OW_Init();
 int8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen, uint8_t *data, uint8_t dLen, uint8_t readStart);
+int8_t OW_Reset();
 
 #endif /* ONEWIRE_H_ */

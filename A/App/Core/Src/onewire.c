@@ -127,59 +127,7 @@ int8_t OW_Send(uint8_t sendReset, uint8_t *command, uint8_t cLen,
 		command++;
 		cLen--;
 
-
-
         uartSendReceive(&owData);
-
-// 		DMA_InitTypeDef DMA_InitStructure;
-
-// 		// DMA на чтение
-// 		DMA_DeInit(OW_DMA_CH_RX);
-// 		DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &(USART2->DR);
-// 		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) ow_buf;
-// 		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-// 		DMA_InitStructure.DMA_BufferSize = 8;
-// 		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-// 		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-// 		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-// 		DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-// 		DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-// 		DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
-// 		DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-// 		DMA_Init(OW_DMA_CH_RX, &DMA_InitStructure);
-
-// 		// DMA на запись
-// 		DMA_DeInit(OW_DMA_CH_TX);
-// 		DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &(USART2->DR);
-// 		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) ow_buf;
-// 		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-// 		DMA_InitStructure.DMA_BufferSize = 8;
-// 		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-// 		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-// 		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-// 		DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-// 		DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-// 		DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
-// 		DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-// 		DMA_Init(OW_DMA_CH_TX, &DMA_InitStructure);
-
-// 		// старт цикла отправки
-// 		USART_ClearFlag(OW_USART, USART_FLAG_RXNE | USART_FLAG_TC | USART_FLAG_TXE);
-// 		USART_DMACmd(OW_USART, USART_DMAReq_Tx | USART_DMAReq_Rx, ENABLE);
-// 		DMA_Cmd(OW_DMA_CH_RX, ENABLE);
-// 		DMA_Cmd(OW_DMA_CH_TX, ENABLE);
-
-// 		// Ждем, пока не примем 8 байт
-// 		while (DMA_GetFlagStatus(OW_DMA_FLAG) == RESET){
-// #ifdef OW_GIVE_TICK_RTOS
-// 			taskYIELD();
-// #endif
-// 		}
-
-// 		// отключаем DMA
-// 		DMA_Cmd(OW_DMA_CH_TX, DISABLE);
-// 		DMA_Cmd(OW_DMA_CH_RX, DISABLE);
-// 		USART_DMACmd(OW_USART, USART_DMAReq_Tx | USART_DMAReq_Rx, DISABLE);
 
 		// если прочитанные данные кому-то нужны - выкинем их в буфер
 		if (readStart == 0 && dLen > 0) {
