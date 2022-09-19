@@ -21,3 +21,4 @@ build/*
 .vscode/*
 !cmake-kits.json
 !cmake-variants.json
+*.pdf

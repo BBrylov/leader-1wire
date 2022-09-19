@@ -34,14 +34,19 @@ extern "C" {
 
 extern TIM_HandleTypeDef htim1;
 
-/* USER CODE BEGIN Private defines */
+extern TIM_HandleTypeDef htim2;
 
+/* USER CODE BEGIN Private defines */
+#define COUNT_OF(arr)      (sizeof(arr) / sizeof(arr[0]))
 /* USER CODE END Private defines */
 
 void MX_TIM1_Init(void);
+void MX_TIM2_Init(void);
+
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN Prototypes */
-int8_t OW_Reseive (uint32_t *buffer,uint16_t size, uint32_t TIMEOUT);
+int8_t OW_Reseive (uint16_t *buffer,uint16_t size, uint32_t TIMEOUT);
 uint32_t OW_Wait_Reset(uint32_t TIMEOUT);
 /* USER CODE END Prototypes */
 
