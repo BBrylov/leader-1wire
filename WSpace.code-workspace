@@ -60,7 +60,10 @@
             "usart.h": "c",
             "_stdint.h": "c",
             "stm32f103xb.h": "c",
-            "system_stm32f1xx.h": "c"
+            "system_stm32f1xx.h": "c",
+            "gpio.h": "c",
+            "usb_device.h": "c",
+            "tim.h": "c"
         },
         "files.autoSave": "afterDelay",
         "editor.codeActionsOnSave": {

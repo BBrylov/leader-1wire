@@ -41,7 +41,8 @@ extern TIM_HandleTypeDef htim1;
 void MX_TIM1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+int8_t OW_Reseive (uint32_t *buffer,uint16_t size, uint32_t TIMEOUT);
+uint32_t OW_Wait_Reset(uint32_t TIMEOUT);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
