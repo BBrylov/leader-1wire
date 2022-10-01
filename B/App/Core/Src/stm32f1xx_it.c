@@ -56,6 +56,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_FS;
+extern DMA_HandleTypeDef hdma_tim1_ch1;
 extern DMA_HandleTypeDef hdma_tim2_ch1;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 extern DMA_HandleTypeDef hdma_usart2_tx;
@@ -87,6 +88,26 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
+  struct 
+  {
+    uint32_t r0;
+    uint32_t r1;
+    uint32_t r2;
+    uint32_t r3;
+    uint32_t r12;
+    uint32_t lr;
+    uint32_t pc;
+    uint32_t psr;
+  }*stack_ptr; //Указатель на текущее значение стека(SP)
+
+ 
+  asm(
+      "TST lr, #4 \n" //Тестируем 3ий бит указателя стека(побитовое И)
+      "ITE EQ \n"   //Значение указателя стека имеет бит 3?
+      "MRSEQ %[ptr], MSP  \n"  //Да, сохраняем основной указатель стека
+      "MRSNE %[ptr], PSP  \n"  //Нет, сохраняем указатель стека процесса
+      : [ptr] "=r" (stack_ptr)
+      );
 
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
@@ -200,6 +221,20 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f1xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles DMA1 channel2 global interrupt.
+  */
+void DMA1_Channel2_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel2_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel2_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_tim1_ch1);
+  /* USER CODE BEGIN DMA1_Channel2_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel2_IRQn 1 */
+}
 
 /**
   * @brief This function handles DMA1 channel5 global interrupt.

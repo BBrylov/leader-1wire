@@ -93,6 +93,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USB_DEVICE_Init();
   MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -104,8 +105,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    //OW_Wait_Reset(1000);
     OW_Wait_Reset(1000);
-    
+    Presence_Pulse(17, 1000);
   }
   /* USER CODE END 3 */
 }
