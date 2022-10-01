@@ -107,7 +107,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     //OW_Wait_Reset(1000);
     OW_Wait_Reset(1000);
-    Presence_Pulse(17, 1000);
+    //Presence_Pulse(17, 1000);
   }
   /* USER CODE END 3 */
 }

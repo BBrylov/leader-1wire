@@ -49,7 +49,7 @@ void MX_TIM3_Init(void);
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN Prototypes */
-int8_t OW_Reseive (uint16_t *buffer,uint16_t size, uint32_t TIMEOUT);
+int8_t OW_Reseive (uint32_t *buffer,uint16_t size, uint32_t TIMEOUT);
 uint32_t OW_Wait_Reset(uint32_t TIMEOUT);
 int8_t Presence_Pulse(uint32_t pulseTime, uint32_t TIMEOUT);
 /* USER CODE END Prototypes */
