@@ -100,8 +100,8 @@ int main(void)
         HAL_Delay(1000);
 
         uint8_t buf[2];
-//        OW_Send(OW_SEND_RESET, "\xcc\xbe\xff\xff", 4, buf,2, 2);
-        OW_Reset();
+        OW_Send(OW_SEND_RESET, "\xcc\xbe\xff\xff", 4, buf,2, 2);
+//        OW_Reset();
 
     /* USER CODE END WHILE */
     loop();

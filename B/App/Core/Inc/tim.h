@@ -40,6 +40,8 @@ extern TIM_HandleTypeDef htim3;
 
 /* USER CODE BEGIN Private defines */
 #define COUNT_OF(arr)      (sizeof(arr) / sizeof(arr[0]))
+#include <stdbool.h>
+#include <stdint.h>
 /* USER CODE END Private defines */
 
 void MX_TIM1_Init(void);
@@ -50,8 +52,8 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN Prototypes */
 int8_t OW_Reseive (uint32_t *buffer,uint16_t size, uint32_t TIMEOUT);
-uint32_t OW_Wait_Reset(uint32_t TIMEOUT);
-int8_t Presence_Pulse(uint32_t pulseTime, uint32_t TIMEOUT);
+bool OWResetPulse(uint32_t TIMEOUT);
+int8_t pulseACK(uint32_t pulseTime);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

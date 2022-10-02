@@ -100,14 +100,18 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uint16_t count=0;
+  uint16_t byteBuffer[8]={0};
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    //OW_Wait_Reset(1000);
-    OW_Wait_Reset(1000);
-    //Presence_Pulse(17, 1000);
+    
+    //OWResetPulse(1000);
+    if (OWResetPulse(10000))
+      OW_Reseive((uint32_t *)byteBuffer,sizeof(byteBuffer)/sizeof(uint16_t),10000);
+
   }
   /* USER CODE END 3 */
 }
