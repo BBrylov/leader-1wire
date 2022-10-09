@@ -20,7 +20,6 @@
 #include "main.h"
 #include "dma.h"
 #include "tim.h"
-#include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
 
@@ -89,9 +88,9 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_TIM1_Init();
-  MX_USART2_UART_Init();
+
   MX_USB_DEVICE_Init();
+  MX_TIM1_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
@@ -102,6 +101,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   uint16_t count=0;
   uint16_t byteBuffer[8]={0};
+  
   while (1)
   {
     /* USER CODE END WHILE */
@@ -109,9 +109,12 @@ int main(void)
     /* USER CODE BEGIN 3 */
     
     //OWResetPulse(1000);
-    if (OWResetPulse(10000))
+    if (OWResetPulse(10000)){
       OW_Reseive((uint32_t *)byteBuffer,sizeof(byteBuffer)/sizeof(uint16_t),10000);
-
+      OW_Reseive((uint32_t *)byteBuffer,sizeof(byteBuffer)/sizeof(uint16_t),10000);
+      OWSendByte(byteBuffer,sizeof(byteBuffer)/sizeof(uint16_t),10000);
+      OWSendByte(byteBuffer,sizeof(byteBuffer)/sizeof(uint16_t),10000);
+    }
   }
   /* USER CODE END 3 */
 }

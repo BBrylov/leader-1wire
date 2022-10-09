@@ -54,6 +54,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 int8_t OW_Reseive (uint32_t *buffer,uint16_t size, uint32_t TIMEOUT);
 bool OWResetPulse(uint32_t TIMEOUT);
 int8_t pulseACK(uint32_t pulseTime);
+int8_t OWSendByte(uint16_t *buffer,uint16_t size, uint32_t TIMEOUT);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
